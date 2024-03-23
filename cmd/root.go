@@ -45,7 +45,34 @@ to quickly create a Cobra application.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	fmt.Println("Hello World!")
+	arg := os.Args[1]
+	result, err := GenItem(arg)
+	if err != nil {
+		fmt.Println("error")
+	}
+
+	err = GenScenario(result)
+	if err != nil {
+		fmt.Println("error")
+	}
+
+	// fmt.Println("Title : ", result.Title)
+	// fmt.Println("Description : ", result.Description)
+	// fmt.Println("Version : ", result.Version)
+	// fmt.Println("BaseURL : ", result.BaseUrl)
+
+	// paths := result.PathSpec
+	// fmt.Println("==========================")
+	// for _, r := range paths {
+	// 	fmt.Println(r.Path)
+	// 	for _, m := range r.Methods {
+	// 		fmt.Println("Method : ", m.Method)
+	// 		fmt.Println("Request Body : ", m.Body)
+	// 		fmt.Println("Request Param : ", m.Params)
+	// 		fmt.Println("Response : ", m.Response)
+	// 		fmt.Println("==========================")
+	// 	}
+	// }
 }
 
 func init() {
