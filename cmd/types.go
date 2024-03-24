@@ -50,9 +50,18 @@ type step struct {
 type requestInfo struct {
 	Method string `yaml:"method,omitempty"`
 	Url    string `yaml:"url,omitempty"`
+	Query  any    `yaml:"query,omitempty"`
 }
 
 type expectInfo struct {
-	StatusCode int `yaml:"statusCode,omitempty"`
+	StatusCode int `yaml:"code,omitempty"`
 	Body       any `yaml:"body,omitempty"`
+}
+
+// 追加のパラメーターの構造体
+type addParam struct {
+	Method string
+	Query  any
+	Body   string
+	Path   string
 }

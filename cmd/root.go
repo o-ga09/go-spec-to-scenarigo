@@ -20,97 +20,118 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
 )
-
-var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "go-spec-to-scenarigo",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "go-spec-to-scenarigo [input file]",
+	Short: "generator API E2E Test Scenario",
+	Long: `generator API E2E Test Scenario
+This CLI tool is used to automatically generate scenarigo test formats from OpenAPI Spec. 
+It generates test expectations with the results of requests to the actual API. 
+			`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	PreRun: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Generator API E2E Test")
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			fmt.Println("must have API Spec")
+			return
+		}
+		input := args[0]
+		flags := *cmd.Flags()
+
+		// 出力ファイル名を読み込み
+		output, _ := flags.GetString("output-file")
+		if output == "" {
+			output = "scenario.yml"
+		}
+
+		// API Specを読み込み
+		result, err := GenItem(input)
+		if err != nil {
+			fmt.Println("error")
+		}
+
+		// APIエンドポイントを読み込み
+		host, _ := flags.GetString("host")
+		if host != "" {
+			result.BaseUrl = host
+		}
+
+		// 追加のテストパターンを読み込む
+		paramfile, _ := flags.GetString("csv-file")
+		var param *map[string]addParam
+		if paramfile != "" {
+			param, err = AddParam(paramfile)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
+		// dry run flagの読み込み
+		dryrunFlg, _ := flags.GetBool("dry-run")
+
+		// シナリオを作成
+		if dryrunFlg {
+			fmt.Println(input)
+			fmt.Println(output)
+			fmt.Println("Title : ", result.Title)
+			fmt.Println("Description : ", result.Description)
+			fmt.Println("Version : ", result.Version)
+			fmt.Println("BaseURL : ", result.BaseUrl)
+
+			paths := result.PathSpec
+			fmt.Println("==========================")
+			for _, r := range paths {
+				fmt.Println(r.Path)
+				for _, m := range r.Methods {
+					fmt.Println("Method : ", m.Method)
+					fmt.Println("Request Body : ", m.Body)
+					fmt.Println("Request Param : ", m.Params)
+					fmt.Println("Response : ", m.Response)
+					fmt.Println("==========================")
+				}
+			}
+		} else if param != nil {
+			err = GenScenario(result, output, param)
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+		} else {
+			err = GenScenario(result, output)
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	arg := os.Args[1]
-	result, err := GenItem(arg)
+	err := rootCmd.Execute()
 	if err != nil {
-		fmt.Println("error")
+		os.Exit(1)
 	}
-
-	err = GenScenario(result)
-	if err != nil {
-		fmt.Println("error")
-	}
-
-	// fmt.Println("Title : ", result.Title)
-	// fmt.Println("Description : ", result.Description)
-	// fmt.Println("Version : ", result.Version)
-	// fmt.Println("BaseURL : ", result.BaseUrl)
-
-	// paths := result.PathSpec
-	// fmt.Println("==========================")
-	// for _, r := range paths {
-	// 	fmt.Println(r.Path)
-	// 	for _, m := range r.Methods {
-	// 		fmt.Println("Method : ", m.Method)
-	// 		fmt.Println("Request Body : ", m.Body)
-	// 		fmt.Println("Request Param : ", m.Params)
-	// 		fmt.Println("Response : ", m.Response)
-	// 		fmt.Println("==========================")
-	// 	}
-	// }
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.go-spec-to-scenarigo.yaml)")
-
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().BoolP("help", "h", false, "Help message")
+	rootCmd.Flags().StringP("output-file", "o", "", "output file name")
+	rootCmd.Flags().StringP("host", "s", "", "API EndPoint")
+	rootCmd.Flags().BoolP("dry-run", "d", false, "dry run mode. not generate scenario file")
+	rootCmd.Flags().StringP("csv-file", "c", "", "add test pattern parameter")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
 
-		// Search config in home directory with name ".go-spec-to-scenarigo" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".go-spec-to-scenarigo")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
 }

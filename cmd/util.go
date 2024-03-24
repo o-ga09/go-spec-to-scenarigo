@@ -1,10 +1,15 @@
 package cmd
 
 import (
+	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	yaml "gopkg.in/yaml.v2"
@@ -26,7 +31,8 @@ func GenItem(inputFileName string) (*APISpec, error) {
 	apiSpec.Title = doc.Info.Title
 	apiSpec.Description = doc.Info.Description
 	apiSpec.Version = doc.Info.Version
-	apiSpec.BaseUrl, _ = doc.Servers.BasePath()
+	// デフォルトでは、一番最初のURLを取得する。オプションで指定したURLが優先される。
+	apiSpec.BaseUrl = doc.Servers[0].URL
 
 	// パス毎に処理
 	for _, path := range doc.Paths.InMatchingOrder() {
@@ -117,7 +123,12 @@ func GenItem(inputFileName string) (*APISpec, error) {
 	return &apiSpec, nil
 }
 
-func GenScenario(apiSpec *APISpec) error {
+func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) error {
+	var param *map[string]addParam
+	if len(opts) > 0 {
+		param = opts[0].(*map[string]addParam)
+	}
+
 	// シナリオの構造体
 	var scenario Scenario
 
@@ -133,16 +144,34 @@ func GenScenario(apiSpec *APISpec) error {
 
 	// ステップ毎にシナリオを作成
 	for _, spec := range apiSpec.PathSpec {
+		// SpecのURLとテスト対象のURLを比較して、パスパラメーターが含まれる場合、テスト対象のURLを置き換える
+		if param != nil {
+			for path, p := range *param {
+				if ok := CompPath(spec.Path, path); ok {
+					requestInfo.Query = p.Query
+					requestInfo.Url = apiSpec.BaseUrl + path
+					break
+				}
+			}
+		}
+
 		for _, method := range spec.Methods {
 			step.Title = method.Summary
 			step.Protocol = "http"
 			requestInfo.Method = method.Method
-			requestInfo.Url = "https://example.com/v1" + spec.Path
 
 			for _, r := range method.Response {
+				// APIにリクエストしてテストデータを取得する
+				method := strings.ToUpper(requestInfo.Method)
+				res, err := GetResponse(requestInfo.Url, method)
+				if err != nil {
+					return err
+				}
+
+				// シナリオのステップ作成する
 				i, _ := strconv.Atoi(r.Name)
 				expectInfo.StatusCode = i
-				expectInfo.Body = r.Example
+				expectInfo.Body = res
 				step.Request = requestInfo
 				step.Expect = expectInfo
 				scenario.Step = append(scenario.Step, step)
@@ -151,7 +180,7 @@ func GenScenario(apiSpec *APISpec) error {
 	}
 
 	// シナリオファイルを作成
-	f, err := os.Create("output.yaml")
+	f, err := os.Create(outputFileName)
 	if err != nil {
 		return errors.New("Scenario file cannot create")
 	}
@@ -170,4 +199,78 @@ func GenScenario(apiSpec *APISpec) error {
 	}
 
 	return nil
+}
+
+func GetResponse(url string, method string) (any, error) {
+	req, _ := http.NewRequest(method, url, nil)
+	req.Header.Set("x-api-key", os.Getenv("API_KEY"))
+	client := new(http.Client)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("access error: %v", err)
+	}
+	response, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("response read error: %v", err)
+	}
+
+	var ConvertResponse map[string]interface{}
+	err = json.Unmarshal(response, &ConvertResponse)
+	if err != nil {
+		return nil, fmt.Errorf("convert error: %v", err)
+	}
+	return ConvertResponse, nil
+}
+
+func AddParam(intpufile string) (*map[string]addParam, error) {
+	param := make(map[string]addParam)
+
+	f, err := os.Open(intpufile)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	csvFile, err := csv.NewReader(f).ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	for _, record := range csvFile {
+		query := make(map[string]interface{})
+
+		paths := strings.Split(record[0], "?")
+		path := paths[0]
+		queries := strings.Split(paths[1], "&")
+		for _, q := range queries {
+			str := strings.Split(q, "=")
+			p1 := str[0]
+			p2 := str[1]
+			query[p1] = p2
+		}
+		param[path] = addParam{
+			Method: record[1],
+			Query:  query,
+			Body:   record[2],
+		}
+	}
+
+	return &param, nil
+}
+
+func CompPath(specPath, testPath string) bool {
+	specPathStr := strings.Split(specPath, "/")
+	testPathStr := strings.Split(testPath, "/")
+
+	if len(specPathStr) != len(testPathStr) {
+		return false
+	}
+	for i, p := range specPathStr {
+		if i == 0 {
+			continue
+		}
+		if strings.Compare(p, testPathStr[i]) != 0 && !strings.Contains(p, "{") {
+			return false
+		}
+	}
+	return true
 }
