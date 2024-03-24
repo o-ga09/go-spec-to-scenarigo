@@ -32,7 +32,11 @@ func GenItem(inputFileName string) (*APISpec, error) {
 	apiSpec.Description = doc.Info.Description
 	apiSpec.Version = doc.Info.Version
 	// デフォルトでは、一番最初のURLを取得する。オプションで指定したURLが優先される。
-	apiSpec.BaseUrl = doc.Servers[0].URL
+	if doc.Servers != nil {
+		apiSpec.BaseUrl = doc.Servers[0].URL
+	} else {
+		apiSpec.BaseUrl = "dummy URL"
+	}
 
 	// パス毎に処理
 	for _, path := range doc.Paths.InMatchingOrder() {
