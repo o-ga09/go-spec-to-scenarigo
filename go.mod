@@ -1,4 +1,4 @@
-module github.com/o-ga09/go-spec-to-scenarigo
+module github.com/o-ga09/spec2scenarigo
 
 go 1.22.0
 
