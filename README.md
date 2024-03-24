@@ -7,7 +7,7 @@
 ## インストール／Install
 
 ```bash
-$ go install github.com/o-ga09/go-spec-to-scenarigo@latest
+$ go install github.com/o-ga09/spec2scenarigo@latest
 ```
 
 ## 使い方／Usage
@@ -19,7 +19,7 @@ $ go install github.com/o-ga09/go-spec-to-scenarigo@latest
 
 ```bash
 Usage:
-  go-spec-to-scenarigo [input file] [flags]
+  spec2scenarigo [input file] [flags]
 
 Flags:
   -c, --csv-file string      add test pattern parameter
