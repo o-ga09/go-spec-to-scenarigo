@@ -244,13 +244,16 @@ func AddParam(intpufile string) (*map[string]addParam, error) {
 
 		paths := strings.Split(record[0], "?")
 		path := paths[0]
-		queries := strings.Split(paths[1], "&")
-		for _, q := range queries {
-			str := strings.Split(q, "=")
-			p1 := str[0]
-			p2 := str[1]
-			query[p1] = p2
+		if len(paths) > 1 {
+			queries := strings.Split(paths[1], "&")
+			for _, q := range queries {
+				str := strings.Split(q, "=")
+				p1 := str[0]
+				p2 := str[1]
+				query[p1] = p2
+			}
 		}
+
 		param[path] = addParam{
 			Method: record[1],
 			Query:  query,
