@@ -13,6 +13,17 @@ $ go install github.com/o-ga09/spec2scenarigo@latest
 ## 使い方／Usage
 
 - ```csv-file```：OpenAPI Specのパラメータを指定したくない場合に、パラメーターを別途指定するcsvファイル
+  - ヘッダなし
+  - カラムの順序は、テスト対象パス（文字列）、HTTPメソッド（文字列）
+  - テスト対象パスに、パスパラメーターやクエリパラメーターを含む
+
+```csv
+/v1/health/xxxxx?companyname=xxxxxx&company=yyyyyyy,GET,
+/v1/company/000000/project/1729712947901?user=xxxxxx,GET
+/v1/user/000000?company=xxxxxx,GET
+```
+
+
 - ```dry-run```：シナリオファイルの生成なしに、デバッグ可能にする
 - ```host```：APIサーバのURL(OpenAPI Specに複数指定されている場合に、一番最初の要素のURLが使用される仕様のため)
 - ```output-file```：シナリオのファイル名を指定可能
@@ -29,6 +40,8 @@ Flags:
   -o, --output-file string   output file name
 ```
 
+
+
 ## 特徴／Features
 
 - テスト対象のAPIのレスポンスを使用して、シナリオを生成する
@@ -43,3 +56,4 @@ Flags:
 
 - [ ] テストを書く
 - [ ] APIをリクエストする認証に対応する（basic認証、Bearer認証、awssigv4）
+- [ ] リクエストボディ（文字列）をcsvで指定できるようにする
