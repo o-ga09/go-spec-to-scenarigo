@@ -2,12 +2,12 @@
 
 ## 概要／Overview
 
-本CLIツールは、OpenAPIからScenarigoのテストシナリオを生成するためのツールです。
+本CLIは、OpenAPIからScenarigoのテストシナリオを生成するためのツールです。
 
 ## インストール／Install
 
 ```bash
-$ go install github.com/o-ga09/spec2scenarigo@latest
+$ go install github.com/o-ga09/spec2scenarigo@v0.0.1
 ```
 
 ## 使い方／Usage
