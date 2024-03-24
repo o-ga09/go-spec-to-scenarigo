@@ -26,6 +26,7 @@ $ go install github.com/o-ga09/spec2scenarigo@v0.0.1
 
 - ```dry-run```：シナリオファイルの生成なしに、デバッグ可能にする
 - ```host```：APIサーバのURL(OpenAPI Specに複数指定されている場合に、一番最初の要素のURLが使用される仕様のため)
+  - 現在のバージョンでは、```x-api-key```のみ認証を通過できます
 - ```output-file```：シナリオのファイル名を指定可能
 
 ```bash

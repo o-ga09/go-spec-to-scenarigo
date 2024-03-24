@@ -25,15 +25,15 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "go-spec-to-scenarigo [input file]",
-	Short: "generator API E2E Test Scenario",
-	Long: `generator API E2E Test Scenario
+	Short: "API E2E Test Scenario generator",
+	Long: `API E2E Test Scenario generator
 This CLI tool is used to automatically generate scenarigo test formats from OpenAPI Spec. 
 It generates test expectations with the results of requests to the actual API. 
 			`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PreRun: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Generator API E2E Test")
+		fmt.Println("API E2E Test Generator")
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
