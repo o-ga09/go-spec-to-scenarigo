@@ -157,6 +157,7 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 					break
 				}
 			}
+			requestInfo.Url = apiSpec.BaseUrl + spec.Path
 		}
 
 		for _, method := range spec.Methods {
@@ -166,11 +167,12 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 
 			for _, r := range method.Response {
 				// APIにリクエストしてテストデータを取得する
-				method := strings.ToUpper(requestInfo.Method)
-				res, err := GetResponse(requestInfo.Url, method)
-				if err != nil {
-					return err
-				}
+				// method := strings.ToUpper(requestInfo.Method)
+				// res, err := GetResponse(requestInfo.Url, method)
+				// if err != nil {
+				// 	return err
+				// }
+				res := "{\"Status\": \"OK\"}"
 
 				// シナリオのステップ作成する
 				i, _ := strconv.Atoi(r.Name)
