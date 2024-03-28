@@ -15,7 +15,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-func GenItem(inputFileName string) (*APISpec, error) {
+func GenItem(inputFileName string, cases []string) (*APISpec, error) {
 	// パス毎の構造体を格納するスライスを定義
 	var apiSpec APISpec
 	var pathSpecs []pathSpec
@@ -87,8 +87,20 @@ func GenItem(inputFileName string) (*APISpec, error) {
 				}
 			}
 
-			if op.Responses != nil {
+			if op.Responses != nil && len(cases) == 0 {
 				for name, r := range op.Responses.Map() {
+					responses = append(responses, responseSpec{
+						Name:        name,
+						Description: *r.Value.Description,
+						Example:     r.Value.Content["application/json"].Example,
+					})
+				}
+			} else if op.Responses != nil && len(cases) > 0 {
+				fmt.Println(len(cases))
+				for name, r := range op.Responses.Map() {
+					if !InArray(name, cases) {
+						continue
+					}
 					responses = append(responses, responseSpec{
 						Name:        name,
 						Description: *r.Value.Description,
@@ -281,4 +293,13 @@ func CompPath(specPath, testPath string) bool {
 		}
 	}
 	return true
+}
+
+func InArray(str string, a []string) bool {
+	for _, s := range a {
+		if strings.Compare(str, s) == 0 {
+			return true
+		}
+	}
+	return false
 }

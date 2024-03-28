@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -50,8 +51,16 @@ It generates test expectations with the results of requests to the actual API.
 			output = "scenario.yml"
 		}
 
+		// テストケースの指定を読み込み
+		casesStr, _ := flags.GetString("test-case")
+		var cases []string
+		if casesStr != "" {
+			cases = strings.Split(casesStr, ",")
+		} else {
+			cases = []string{}
+		}
 		// API Specを読み込み
-		result, err := GenItem(input)
+		result, err := GenItem(input, cases)
 		if err != nil {
 			fmt.Println("error")
 		}
@@ -133,6 +142,7 @@ func init() {
 	rootCmd.Flags().StringP("host", "s", "", "API EndPoint")
 	rootCmd.Flags().BoolP("dry-run", "d", false, "dry run mode. not generate scenario file")
 	rootCmd.Flags().StringP("csv-file", "c", "", "add test pattern parameter")
+	rootCmd.Flags().StringP("test-case", "t", "", "determine use test case")
 }
 
 // initConfig reads in config file and ENV variables if set.
