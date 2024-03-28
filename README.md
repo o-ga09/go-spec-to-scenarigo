@@ -29,6 +29,7 @@ $ go install github.com/o-ga09/spec2scenarigo@v0.0.1
   - 現在のバージョンでは、```x-api-key```のみ認証を通過できます
   - ```export API_KEY=xxx```を設定する必要があります。
 - ```output-file```：シナリオのファイル名を指定可能
+- ```200```、```404```、```400```、```500```といったHTTPステータス毎にテストシナリオを生成できる。
 
 ```bash
 Usage:
@@ -40,6 +41,8 @@ Flags:
   -h, --help                 Help message
   -s, --host string          API EndPoint
   -o, --output-file string   output file name
+  -t, --test-case string     determine use test case
+  -v, --version              version for go-spec-to-scenarigo
 ```
 
 

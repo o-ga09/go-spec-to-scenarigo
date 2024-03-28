@@ -31,7 +31,7 @@ var rootCmd = &cobra.Command{
 This CLI tool is used to automatically generate scenarigo test formats from OpenAPI Spec. 
 It generates test expectations with the results of requests to the actual API. 
 			`,
-	Version: "v0.0.5",
+	Version: "v0.0.6",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PreRun: func(cmd *cobra.Command, args []string) {
