@@ -15,8 +15,8 @@ limitations under the License.
 */
 package main
 
-import "github.com/o-ga09/spec2scenarigo/cmd"
+import root "github.com/o-ga09/spec2scenarigo/app/internal"
 
 func main() {
-	cmd.Execute()
+	root.Execute()
 }

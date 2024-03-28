@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: MH-API
+  description: Monster Hunter API Documentation
+  version: 1.0.0
+
+paths:
+  /v1/health:
+    get:
+      summary: ヘルスチェックエンドポイント
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              example:
+                $ref: "#components/schemas/msg/example"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              example:
+                $ref: "#components/schemas/msg/example"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                $ref: "#components/schemas/msg/example"        
+components:
+  schemas:
+    msg:
+      type: string
+      format: 半角英数字100文字
+      maxLength: 100
+      description: ステータスメッセージです。
+      example: 
+        message: 000000000000000
+

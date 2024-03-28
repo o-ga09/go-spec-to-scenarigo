@@ -1,4 +1,4 @@
-package cmd
+package root
 
 // API Spec 構造体
 type APISpec struct {
