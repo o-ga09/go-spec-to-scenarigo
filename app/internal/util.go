@@ -97,7 +97,6 @@ func GenItem(inputFileName string, cases []string) (*APISpec, error) {
 					})
 				}
 			} else if op.Responses != nil && len(cases) > 0 {
-				fmt.Println(len(cases))
 				for name, r := range op.Responses.Map() {
 					if !pkg.InArray(name, cases) {
 						continue
@@ -169,8 +168,8 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 					requestInfo.Url = apiSpec.BaseUrl + path
 					break
 				}
+				requestInfo.Url = apiSpec.BaseUrl + spec.Path
 			}
-			requestInfo.Url = apiSpec.BaseUrl + spec.Path
 		}
 
 		for _, method := range spec.Methods {
