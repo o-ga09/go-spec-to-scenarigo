@@ -219,6 +219,7 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 }
 
 func GetResponse(url string, method string) (any, error) {
+	fmt.Println(url)
 	req, _ := http.NewRequest(method, url, nil)
 	req.Header.Set("x-api-key", os.Getenv("API_KEY"))
 	client := new(http.Client)
