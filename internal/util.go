@@ -180,7 +180,7 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 			for _, r := range method.Response {
 				// APIにリクエストしてテストデータを取得する
 				method := strings.ToUpper(requestInfo.Method)
-				res, err := GetResponse(requestInfo.Url, method)
+				res, err := GetResponse(requestInfo.Url, requestInfo.Query, method)
 				if err != nil {
 					return err
 				}
@@ -218,9 +218,14 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 	return nil
 }
 
-func GetResponse(url string, method string) (any, error) {
-	fmt.Println(url)
-	req, _ := http.NewRequest(method, url, nil)
+func GetResponse(url string, query any, method string) (any, error) {
+	qs := ""
+	q := query.(map[string]interface{})
+	for k, v := range q {
+		qs += fmt.Sprintf("%s=%s&", k, v)
+	}
+	reqUrl := fmt.Sprintf("%s?%s", url, qs)
+	req, _ := http.NewRequest(method, reqUrl, nil)
 	req.Header.Set("x-api-key", os.Getenv("API_KEY"))
 	client := new(http.Client)
 	resp, err := client.Do(req)

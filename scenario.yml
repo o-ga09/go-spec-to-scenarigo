@@ -1,0 +1,14 @@
+title: MH-API
+steps:
+- title: ヘルスチェックエンドポイント
+  protocol: http
+  request:
+    method: GET
+    url: http://localhost:8080/v1/health
+    query:
+      companId: xxxxx
+      userId: 2222,2222
+  expect:
+    code: 200
+    body:
+      Message: ok
