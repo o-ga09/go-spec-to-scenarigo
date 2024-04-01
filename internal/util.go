@@ -224,7 +224,14 @@ func GetResponse(url string, query any, method string) (any, error) {
 	for k, v := range q {
 		qs += fmt.Sprintf("%s=%s&", k, v)
 	}
-	reqUrl := fmt.Sprintf("%s?%s", url, qs)
+
+	reqUrl := ""
+	if qs == "" {
+		reqUrl = url
+	} else {
+		reqUrl = fmt.Sprintf("%s?%s", url, qs)
+	}
+	fmt.Println(reqUrl)
 	req, _ := http.NewRequest(method, reqUrl, nil)
 	req.Header.Set("x-api-key", os.Getenv("API_KEY"))
 	client := new(http.Client)
