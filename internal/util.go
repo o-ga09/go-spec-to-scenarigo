@@ -12,7 +12,8 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/o-ga09/spec2scenarigo/app/pkg"
+	"github.com/o-ga09/spec2scenarigo/pkg"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
