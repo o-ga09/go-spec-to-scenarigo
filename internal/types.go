@@ -51,6 +51,7 @@ type requestInfo struct {
 	Method string `yaml:"method,omitempty"`
 	Url    string `yaml:"url,omitempty"`
 	Query  any    `yaml:"query,omitempty"`
+	Header any    `yaml:"header,omitempty"`
 }
 
 type expectInfo struct {

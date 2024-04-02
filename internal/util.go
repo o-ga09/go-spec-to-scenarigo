@@ -176,6 +176,7 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 			step.Title = method.Summary
 			step.Protocol = "http"
 			requestInfo.Method = method.Method
+			requestInfo.Header = map[string]string{"x-api-key": "{{ env.API_KEY }}"}
 
 			for _, r := range method.Response {
 				// APIにリクエストしてテストデータを取得する
