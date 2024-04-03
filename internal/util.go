@@ -155,8 +155,14 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 	var requestInfo requestInfo
 	var expectInfo expectInfo
 
+	// 想定結果レスポンス取得用URL変数
+	var reqURL string
+
 	// シナリオを作成
 	scenario.Title = apiSpec.Title
+
+	// 共通で使用する変数を定義
+	scenario.Vars = map[string]string{"endpoint": apiSpec.BaseUrl}
 
 	// ステップ毎にシナリオを作成
 	for _, spec := range apiSpec.PathSpec {
@@ -165,11 +171,16 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 			for path, p := range *param {
 				if ok := pkg.CompPath(spec.Path, path); ok {
 					requestInfo.Query = p.Query
-					requestInfo.Url = apiSpec.BaseUrl + path
+					requestInfo.Url = "{{ vars.endpoint }}" + path
+					reqURL = apiSpec.BaseUrl + path
 					break
 				}
-				requestInfo.Url = apiSpec.BaseUrl + spec.Path
+				reqURL = apiSpec.BaseUrl + spec.Path
+				requestInfo.Url = "{{ vars.endpoint }}" + spec.Path
 			}
+		} else {
+			reqURL = apiSpec.BaseUrl + spec.Path
+			requestInfo.Url = "{{ vars.endpoint }}" + spec.Path
 		}
 
 		for _, method := range spec.Methods {
@@ -181,7 +192,7 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 			for _, r := range method.Response {
 				// APIにリクエストしてテストデータを取得する
 				method := strings.ToUpper(requestInfo.Method)
-				res, err := GetResponse(requestInfo.Url, requestInfo.Query, method)
+				res, err := GetResponse(reqURL, requestInfo.Query, method)
 				if err != nil {
 					return err
 				}

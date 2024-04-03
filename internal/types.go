@@ -36,8 +36,9 @@ type responseSpec struct {
 
 // Scenarigo 構造体
 type Scenario struct {
-	Title string `yaml:"title,omitempty"`
-	Step  []step `yaml:"steps,omitempty"`
+	Title string            `yaml:"title,omitempty"`
+	Vars  map[string]string `yaml:"vars,omitempty"`
+	Step  []step            `yaml:"steps,omitempty"`
 }
 
 type step struct {
