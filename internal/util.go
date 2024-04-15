@@ -232,9 +232,12 @@ func GenScenario(apiSpec *APISpec, outputFileName string, opts ...interface{}) e
 
 func GetResponse(url string, query any, method string) (any, error) {
 	qs := ""
-	q := query.(map[string]interface{})
-	for k, v := range q {
-		qs += fmt.Sprintf("%s=%s&", k, v)
+
+	if query != nil {
+		q := query.(map[string]interface{})
+		for k, v := range q {
+			qs += fmt.Sprintf("%s=%s&", k, v)
+		}
 	}
 
 	reqUrl := ""
@@ -243,7 +246,6 @@ func GetResponse(url string, query any, method string) (any, error) {
 	} else {
 		reqUrl = fmt.Sprintf("%s?%s", url, qs)
 	}
-	fmt.Println(reqUrl)
 	req, _ := http.NewRequest(method, reqUrl, nil)
 	req.Header.Set("x-api-key", os.Getenv("API_KEY"))
 	client := new(http.Client)
